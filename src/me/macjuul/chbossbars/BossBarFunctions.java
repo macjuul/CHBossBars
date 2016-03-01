@@ -58,7 +58,7 @@ public class BossBarFunctions {
 			BossBar bar = Bukkit.createBossBar(title, BarColor.PINK, BarStyle.SOLID);
 			
 			if(args.length == 3) {
-				BossBarManager.setBarOptions(bar, Static.getArray(args[1], t));
+				BossBarManager.setBarOptions(bar, Static.getArray(args[2], t));
 			}
 			
 			BossBarManager.addBar(id, bar);
