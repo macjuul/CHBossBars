@@ -148,8 +148,15 @@ public class BossBarFunctions {
 		
 		public Construct exec(Target t, Environment environment, Construct... args) throws CREException {
 			String id = args[0].val();
-			CArray options = Static.getArray(args[1], t);
+			CArray options;
 			BossBar bar = BossBarManager.getBar(id);
+			
+			if(args.length == 2) {
+				options = Static.getArray(args[1], t);
+			} else {
+				options = new CArray(t);
+				options.set(args[1].val(), args[2].val());
+			}
 			
 			BossBarManager.setBarOptions(bar, options);
 			
@@ -161,11 +168,11 @@ public class BossBarFunctions {
 	 	}
 
 		public Integer[] numArgs() {
-			return new Integer[] {2};
+			return new Integer[] {2, 3};
 		}
 		
 		public String docs() {
-            return "void {String ID, Array options} Update a bossbars options";
+            return "void {String ID, Array options | String ID, String option, String, value} Update a bossbars options";
         }
 
         public Version since() {
@@ -333,7 +340,7 @@ public class BossBarFunctions {
 	}
 	
 	@api
-	public static class add_bossbar_flag extends AbstractFunction {
+	public static class set_bossbar_flag extends AbstractFunction {
 
 		@SuppressWarnings("unchecked")
 		public Class<? extends CREThrowable>[] thrown() {
@@ -353,26 +360,32 @@ public class BossBarFunctions {
 		public Construct exec(Target t, Environment environment, Construct... args) throws CREException {
 			BossBar bar = BossBarManager.getBar(args[0].val());
 			String flag = args[1].val();
+			Boolean state = Static.getBoolean(args[2]);
 			
 			try {
-				bar.addFlag(BarFlag.valueOf(flag.toUpperCase()));
+				BarFlag f = BarFlag.valueOf(flag.toUpperCase());
+				if(state) {
+					bar.addFlag(f);
+				} else {
+					bar.removeFlag(f);
+				}
 			} catch(IllegalArgumentException e) {
-				throw new CRENotFoundException("Unknown bar flag. Possible values", Target.UNKNOWN);
+				throw new CRENotFoundException("Unknown bar flag. Possible values PLAY_BOSS_MUSIC, DARKEN_SKY and CREATE_FOG", Target.UNKNOWN);
 			}
 				
 			return CVoid.VOID;
 		}
 		
 		public String getName() {
-			return "add_bossbar_flag";
+			return "set_bossbar_flag";
 	 	}
 
 		public Integer[] numArgs() {
-			return new Integer[] {1, 2};
+			return new Integer[] {3};
 		}
 		
 		public String docs() {
-            return "void {String ID, String flag} Adds the given flag to the bossbar. Possible flags are CREATE_FOG, DARKEN_SKY and PLAY_BOSS_MUSIC";
+            return "void {String ID, String flag, Boolean state} Update a bossbars flag";
         }
 
         public Version since() {
@@ -382,7 +395,7 @@ public class BossBarFunctions {
 	}
 	
 	@api
-	public static class remove_bossbar_flag extends AbstractFunction {
+	public static class get_bossbar_flag extends AbstractFunction {
 
 		@SuppressWarnings("unchecked")
 		public Class<? extends CREThrowable>[] thrown() {
@@ -401,30 +414,28 @@ public class BossBarFunctions {
 		
 		public Construct exec(Target t, Environment environment, Construct... args) throws CREException {
 			BossBar bar = BossBarManager.getBar(args[0].val());
-			BarFlag flag = BarFlag.valueOf(args[1].val());
+			String flag = args[1].val();
+			BarFlag f;
 			
 			try {
-				if(bar.hasFlag(flag)) {
-					bar.removeFlag(flag);
-					return CBoolean.TRUE;
-				}
+				f = BarFlag.valueOf(flag.toUpperCase());
 			} catch(IllegalArgumentException e) {
-				throw new CRENotFoundException("Unknown bar flag", Target.UNKNOWN);
+				throw new CRENotFoundException("Unknown bar flag. Possible values PLAY_BOSS_MUSIC, DARKEN_SKY and CREATE_FOG", Target.UNKNOWN);
 			}
 				
-			return CBoolean.FALSE;
+			return CBoolean.GenerateCBoolean(bar.hasFlag(f), t);
 		}
 		
 		public String getName() {
-			return "remove_bossbar_flag";
+			return "get_bossbar_flag";
 	 	}
 
 		public Integer[] numArgs() {
-			return new Integer[] {1, 2};
+			return new Integer[] {2};
 		}
 		
 		public String docs() {
-            return "boolean {String ID, String flag} Removed the given flag from the bossbar. Returns true if the flag exited and was removed";
+            return "Boolean {String ID, String flag} Returns true if a bossbars flag is set";
         }
 
         public Version since() {
@@ -481,5 +492,4 @@ public class BossBarFunctions {
         }
         
 	}
-	
 }
