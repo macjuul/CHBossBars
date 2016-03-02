@@ -16,6 +16,7 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
@@ -24,6 +25,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.functions.AbstractFunction;
@@ -182,7 +184,7 @@ public class BossBarFunctions {
 	}
 	
 	@api
-	public static class add_pbossbar extends AbstractFunction {
+	public static class set_pbossbar extends AbstractFunction {
 
 		@SuppressWarnings("unchecked")
 		public Class<? extends CREThrowable>[] thrown() {
@@ -218,7 +220,7 @@ public class BossBarFunctions {
 		}
 		
 		public String getName() {
-			return "add_pbossbar";
+			return "set_pbossbar";
 	 	}
 
 		public Integer[] numArgs() {
@@ -485,6 +487,73 @@ public class BossBarFunctions {
 		
 		public String docs() {
             return "Array {} Lists all bossbars";
+        }
+
+        public Version since() {
+            return CHVersion.V3_3_2;
+        }
+        
+	}
+	
+	@api
+	public static class get_bossbar_options extends AbstractFunction {
+
+		@SuppressWarnings("unchecked")
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[] {
+                 CRECastException.class
+			};
+		}
+		
+		public boolean isRestricted() {
+            return false;
+        }
+		
+		public Boolean runAsync() {
+            return false;
+        }
+		
+		public Construct exec(Target t, Environment environment, Construct... args) throws CREException {
+			String id = args[0].val();
+			BossBar bar = BossBarManager.getBar(id);
+			
+			if(args.length == 1) {
+				CArray options = new CArray(t);
+				
+				options.set("color", bar.getColor().toString(), t);
+				options.set("style", bar.getStyle().toString(), t);
+				options.set("progress", new Double(bar.getProgress()).toString(), t);
+				options.set("title", bar.getTitle(), t);
+				
+				return options;
+			}
+			
+			String option = args[1].val().toUpperCase();
+			
+			switch(option) {
+			case "COLOR":
+				return new CString(bar.getColor().toString(), t);
+			case "STYLE":
+				return new CString(bar.getStyle().toString(), t);
+			case "PROGRESS":
+				return new CDouble(bar.getProgress(), t);
+			case "TITLE":
+				return new CString(bar.getTitle(), t);
+			default:
+				throw new CREIllegalArgumentException("Invalid option. Possible options are COLOR, STYLE, PROGRESS and TITLE", Target.UNKNOWN);
+			}
+		}
+		
+		public String getName() {
+			return "get_bossbar_options";
+	 	}
+
+		public Integer[] numArgs() {
+			return new Integer[] {1, 2};
+		}
+		
+		public String docs() {
+            return "Array options {String ID | String ID, String option} Get a bossbars options. Can return a single option value if specified";
         }
 
         public Version since() {
