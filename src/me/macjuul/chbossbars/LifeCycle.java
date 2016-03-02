@@ -14,7 +14,7 @@ public class LifeCycle extends AbstractExtension {
 	public static HashMap<String, BossBar> bars;
 
 	public Version getVersion() {
-        return new SimpleVersion(1, 0, 0);
+        return new SimpleVersion(1, 0, 1);
     }
 
     public void onShutdown() {
