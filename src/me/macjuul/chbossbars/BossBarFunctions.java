@@ -314,11 +314,7 @@ public class BossBarFunctions {
 			boolean visible = Static.getBoolean(args[1]);
 			BossBar bar = BossBarManager.getBar(id);
 			
-			if(visible) {
-				bar.show();
-			} else {
-				bar.hide();
-			}
+			bar.setVisible(visible);
 			
 			return CVoid.VOID;
 		}
@@ -340,6 +336,49 @@ public class BossBarFunctions {
         }
         
 	}
+	
+	@api
+    public static class get_bossbar_visibility extends AbstractFunction {
+
+        @SuppressWarnings("unchecked")
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[] {
+                 CRECastException.class
+            };
+        }
+        
+        public boolean isRestricted() {
+            return false;
+        }
+        
+        public Boolean runAsync() {
+            return false;
+        }
+        
+        public Construct exec(Target t, Environment environment, Construct... args) throws CREException {
+            String id = args[0].val();
+            BossBar bar = BossBarManager.getBar(id);
+            
+            return CBoolean.GenerateCBoolean(bar.isVisible(), t);
+        }
+        
+        public String getName() {
+            return "get_bossbar_visibility";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[] {1};
+        }
+        
+        public String docs() {
+            return "void {String ID} Gets a bosbars visibility";
+        }
+
+        public Version since() {
+            return CHVersion.V3_3_2;
+        }
+        
+    }
 	
 	@api
 	public static class set_bossbar_flag extends AbstractFunction {
